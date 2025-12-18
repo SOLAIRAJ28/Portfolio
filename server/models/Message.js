@@ -1,0 +1,48 @@
+import mongoose from 'mongoose';
+
+const messageSchema = new mongoose.Schema({
+  tokenId: {
+    type: String,
+    required: true,
+    unique: true,
+    index: true
+  },
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  email: {
+    type: String,
+    required: true,
+    trim: true,
+    lowercase: true
+  },
+  message: {
+    type: String,
+    required: true
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'read', 'replied'],
+    default: 'pending'
+  },
+  emailSent: {
+    type: Boolean,
+    default: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+}, {
+  timestamps: true
+});
+
+// Index for searching
+messageSchema.index({ email: 1, createdAt: -1 });
+messageSchema.index({ tokenId: 1 });
+
+const Message = mongoose.model('Message', messageSchema);
+
+export default Message;

@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+  
+  body {
+    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+    @apply font-sans antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/10 dark:bg-gray-800/10 backdrop-blur-md border border-white/20 dark:border-gray-700/20;
+  }
+
+  .glass-strong {
+    @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50;
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500;
+  }
+
+  .section-padding {
+    @apply py-20 px-4 sm:px-6 lg:px-8;
+  }
+
+  .container-custom {
+    @apply max-w-7xl mx-auto;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
+  }
+}
+
+/* Luxury motion easing */
+:root {
+  --ease-luxury: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Smooth transitions with refined easing */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: var(--ease-luxury);
+  transition-duration: 250ms;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Professional hover effects */
+a, button {
+  cursor: pointer;
+  transition: all 0.25s var(--ease-luxury);
+}
+
+/* Refined link underline animation */
+a.link-underline {
+  position: relative;
+}
+
+a.link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.3s var(--ease-luxury);
+}
+
+a.link-underline:hover::after {
+  width: 100%;
+}
+
+/* Subtle cursor aura on hoverable elements */
+@media (hover: hover) and (pointer: fine) {
+  button:hover::before,
+  a:hover::before,
+  [role="button"]:hover::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: inherit;
+    background: radial-gradient(circle at center, rgba(201, 51, 86, 0.08), transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+    animation: auraFade 0.3s var(--ease-luxury);
+  }
+}
+
+@keyframes auraFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
