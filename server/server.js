@@ -35,26 +35,21 @@ const connectDB = async () => {
 
 connectDB();
 
-// Email configuration
+// Email configuration - Using port 465 (SSL) for better compatibility with Render
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // Use TLS
+  port: 465,
+  secure: true, // Use SSL
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD, // Gmail App Password
   },
   tls: {
-    rejectUnauthorized: false,
-    ciphers: 'SSLv3'
+    rejectUnauthorized: false
   },
   connectionTimeout: 10000, // 10 seconds
   greetingTimeout: 10000,
-  socketTimeout: 10000,
-  pool: true,
-  maxConnections: 1,
-  rateDelta: 20000,
-  rateLimit: 5
+  socketTimeout: 10000
 });
 
 // Verify email configuration (don't block server startup)
