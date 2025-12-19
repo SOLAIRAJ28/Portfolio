@@ -80,7 +80,7 @@ const Navbar = () => {
                 {activeSection === item.id && (
                   <motion.div
                     layoutId="activeSection"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-500 to-blue-500"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -119,7 +119,7 @@ const Navbar = () => {
                     onClick={() => scrollToSection(item.id)}
                     className={`block w-full text-left px-4 py-3 rounded-lg transition-colors ${
                       activeSection === item.id
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                        ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
                         : 'text-gray-300 hover:bg-white/10'
                     }`}
                   >

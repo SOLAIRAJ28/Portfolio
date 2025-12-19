@@ -29,6 +29,10 @@ export default {
         'gradient': 'gradient 8s linear infinite',
         'float': 'float 6s ease-in-out infinite',
         'blob': 'blob 7s infinite',
+        'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
+        'shimmer': 'shimmer 3s linear infinite',
+        'spin-slow': 'spin 8s linear infinite',
+        'bounce-slow': 'bounce 3s ease-in-out infinite',
       },
       keyframes: {
         gradient: {

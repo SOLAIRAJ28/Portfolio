@@ -40,7 +40,7 @@ const FloatingContact = () => {
             onClick={scrollToContact}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="p-4 rounded-full bg-gradient-to-r from-primary-500 to-purple-600 
+            className="p-4 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 
                      text-white shadow-2xl hover:shadow-primary-500/50 
                      transition-shadow duration-300 group relative"
             aria-label="Contact me"

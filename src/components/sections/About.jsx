@@ -125,8 +125,8 @@ const About = () => {
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.1 }}
                       whileHover={{ scale: 1.05 }}
-                      className="px-4 py-2 bg-gradient-to-r from-purple-600/10 to-pink-500/10 
-                               border border-purple-600/20 rounded-full text-sm font-medium
+                      className="px-4 py-2 bg-gradient-to-r from-cyan-600/10 to-blue-500/10 
+                               border border-cyan-600/20 rounded-full text-sm font-medium
                                text-gray-700 dark:text-gray-300"
                     >
                       {skill}

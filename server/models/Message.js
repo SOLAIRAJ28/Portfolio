@@ -22,11 +22,6 @@ const messageSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  status: {
-    type: String,
-    enum: ['pending', 'read', 'replied'],
-    default: 'pending'
-  },
   emailSent: {
     type: Boolean,
     default: false

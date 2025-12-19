@@ -1,9 +1,8 @@
 // Portfolio data - Update with your personal information
 
 export const personalInfo = {
-  name: "Solairaj R",
+  name: "SOLAIRAJ R",
   role: "Web Developer",
-  tagline: "Computer Science fresher with a strong passion for coding and software development. Interested in creating meaningful projects and contributing effectively in a professional environment.",
   email: "solairaj495@gmail.com",
   phone: "+91 8056453211",
   location: "Theni, Tamil Nadu",
@@ -29,7 +28,7 @@ export const about = {
     },
     {
       degree: "Higher Secondary Certificate",
-      institution: "Velavakunan Maha Matric Hr Sec School | Theni",
+      institution: "Vailankanni Matha Matric Hr Sec School | Theni",
       year: "2022 - 2023",
       description: "Percentage: 84.83%"
     }
@@ -57,7 +56,6 @@ export const skills = {
     { name: "CSS", level: 90 },
     { name: "JavaScript", level: 85 },
     { name: "React.js", level: 85 },
-    { name: "Tailwind CSS", level: 90 },
     { name: "Bootstrap", level: 80 },
   ],
   backend: [
@@ -65,7 +63,6 @@ export const skills = {
     { name: "Express.js", level: 80 },
     { name: "MySQL", level: 75 },
     { name: "MongoDB", level: 85 },
-    { name: "REST APIs", level: 80 },
     { name: "Java", level: 75 },
   ],
   tools: [
@@ -81,8 +78,8 @@ export const projects = [
   {
     id: 1,
     title: "Weather App",
-    description: "Built a weather app with real-time weather and interactive map search. Added trip planning features with dates, hotels, favourites, and history. Developed secure dual-login for tourists and operators. Enhanced user experience by integrating weather planning and reviews.",
-    image: "/images/weather-app.svg",
+    description: "Built a weather app with real-time weather and interactive map search. Added trip planning features with dates, hotels, favourites, and history. Developed secure dual-login for tourists and operators.",
+    image: "https://images.unsplash.com/photo-1592210454359-9043f067919b?w=800&h=600&fit=crop",
     technologies: ["React", "Tailwind CSS", "Node.js", "MongoDB", "Express", "OpenStreetMap API", "Open-Meteo API"],
     github: "https://github.com/SOLAIRAJ28/weather-app",
     demo: "#",
@@ -92,7 +89,7 @@ export const projects = [
     id: 2,
     title: "Inventory Management System",
     description: "Built a full-stack Inventory Management System with secure authentication and role-based access. Implemented stock tracking, notifications, sales analytics, and reporting features for better decision-making.",
-    image: "/images/inventory.svg",
+    image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&h=600&fit=crop",
     technologies: ["React.js", "Node.js", "MySQL", "Express", "JWT", "REST API"],
     github: "https://github.com/SOLAIRAJ28/inventory-management",
     demo: "#",
@@ -102,18 +99,17 @@ export const projects = [
     id: 3,
     title: "Student Performance Analysis Tool",
     description: "Comprehensive student performance tracking and analysis system. Features include grade tracking, performance metrics, attendance monitoring, and data visualization with detailed reports for educators.",
-    image: "/images/student-performance.svg",
+    image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&h=600&fit=crop",
     technologies: ["HTML", "CSS", "Python", "SQL", "Flask", "Data Analysis"],
     github: "https://github.com/SOLAIRAJ28/student-performance-analysis-tool",
     demo: "#",
     featured: true,
-    stars: 1,
   },
   {
     id: 4,
     title: "Netflix Clone",
     description: "Full-featured Netflix clone with modern UI/UX. Implements video streaming interface, user authentication, content browsing, and responsive design using TypeScript and modern web technologies.",
-    image: "/images/netflix.svg",
+    image: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=800&h=600&fit=crop",
     technologies: ["TypeScript", "React", "CSS", "API Integration"],
     github: "https://github.com/SOLAIRAJ28/Netflix_clone",
     demo: "#",
@@ -123,7 +119,7 @@ export const projects = [
     id: 5,
     title: "Music App",
     description: "Interactive music streaming application with playlist management, search functionality, and audio controls. Built with modern web technologies for seamless music playback experience.",
-    image: "/images/music-app.svg",
+    image: "https://images.unsplash.com/photo-1614680376739-414d95ff43df?w=800&h=600&fit=crop",
     technologies: ["React", "JavaScript", "HTML", "CSS", "Web Audio API"],
     github: "https://github.com/SOLAIRAJ28/music-app",
     demo: "#",
@@ -133,22 +129,11 @@ export const projects = [
     id: 6,
     title: "House Price Prediction",
     description: "Machine learning-based house price prediction system. Analyzes various property features to provide accurate price estimates using HTML interface and predictive algorithms.",
-    image: "/images/house-price.svg",
+    image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop",
     technologies: ["HTML", "Python", "Machine Learning", "Data Science"],
     github: "https://github.com/SOLAIRAJ28/house_price",
     demo: "#",
     featured: true,
-  },
-  {
-    id: 7,
-    title: "Password Manager",
-    description: "Secure password management application with encryption. Features include password generation, secure storage, easy retrieval, and organized password categorization with modern security practices.",
-    image: "/images/project1.svg",
-    technologies: ["JavaScript", "Node.js", "Encryption", "Security"],
-    github: "https://github.com/SOLAIRAJ28/Password_Manager",
-    demo: "#",
-    featured: false,
-    stars: 1,
   },
 ];
 
@@ -169,7 +154,7 @@ export const experience = [
   {
     id: 2,
     title: "Higher Secondary Certificate",
-    company: "Velavakunan Maha Matric Hr Sec School",
+    company: "Vailankanni Matha Matric Hr Sec School",
     location: "Theni, Tamil Nadu",
     period: "2022 - 2023",
     type: "education",
@@ -185,16 +170,16 @@ export const achievements = [
   {
     title: "MongoDB Associate Developer",
     description: "MongoDB Global Certification",
-    year: "2024"
+    year: "2025"
   },
   {
     title: "APEX Cloud Developer Professional",
     description: "Oracle Global Certification",
-    year: "2024"
+    year: "2025"
   },
   {
     title: "Java Foundation Course",
     description: "Oracle Certified Java Foundation",
-    year: "2024"
+    year: "2025"
   },
 ];

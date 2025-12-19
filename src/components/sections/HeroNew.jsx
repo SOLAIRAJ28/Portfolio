@@ -12,8 +12,8 @@ const HeroNew = () => {
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950">
       {/* Animated Mesh Background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-slate-900 to-pink-900/20"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.1),transparent_50%)] animate-pulse" style={{ animationDuration: '4s' }}></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/20 via-slate-900 to-blue-900/20"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.1),transparent_50%)] animate-pulse" style={{ animationDuration: '4s' }}></div>
       </div>
       
       {/* Floating Particles */}
@@ -21,7 +21,7 @@ const HeroNew = () => {
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-purple-400/40 rounded-full"
+            className="absolute w-1 h-1 bg-cyan-400/40 rounded-full"
             initial={{
               x: Math.random() * window.innerWidth,
               y: Math.random() * window.innerHeight,
@@ -43,7 +43,7 @@ const HeroNew = () => {
       {/* Animated Gradient Orbs */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          className="absolute w-[800px] h-[800px] bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-full blur-3xl"
+          className="absolute w-[800px] h-[800px] bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-full blur-3xl"
           animate={{
             y: [0, 50, 0],
             x: [0, 30, 0],
@@ -69,7 +69,7 @@ const HeroNew = () => {
           style={{ bottom: '-30%', right: '-20%' }}
         />
         <motion.div
-          className="absolute w-[500px] h-[500px] bg-gradient-to-r from-violet-600/20 to-purple-600/20 rounded-full blur-3xl"
+          className="absolute w-[500px] h-[500px] bg-gradient-to-r from-sky-600/20 to-blue-600/20 rounded-full blur-3xl"
           animate={{
             y: [0, -30, 0],
             x: [0, 50, 0],
@@ -85,17 +85,296 @@ const HeroNew = () => {
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32">
-        <div className="flex flex-col items-center justify-center text-center">
-          {/* Avatar with glow */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Left Side - Text Content */}
+          <div className="flex flex-col items-center lg:items-start text-center lg:text-left order-2 lg:order-1">
+            {/* Greeting */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="mb-4"
+            >
+              <span className="inline-block px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-cyan-300 text-sm font-medium">
+                👋 Welcome to my portfolio
+              </span>
+            </motion.div>
+
+          {/* Name */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-8"
+          >
+            <span className="bg-gradient-to-r from-white via-blue-200 to-cyan-200 bg-clip-text text-transparent">
+              {personalInfo.name.toUpperCase()}
+            </span>
+          </motion.h1>
+
+          {/* Animated Role Title - One at a time */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-8 flex justify-center"
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="mb-8"
           >
-            <div className="relative inline-block">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-xl opacity-30"></div>
-              <div className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-purple-500/30 shadow-2xl">
+            <div className="relative min-h-[80px] sm:min-h-[100px] flex items-center justify-center">
+              {/* Full Stack Developer */}
+              <motion.div 
+                className="absolute inset-0 flex items-center justify-center"
+                initial={{ opacity: 0, scale: 0.5, rotateX: -90 }}
+                animate={{ 
+                  opacity: [0, 1, 1, 1, 0],
+                  scale: [0.5, 1, 1, 1, 0.5],
+                  rotateX: [-90, 0, 0, 0, 90],
+                  y: [50, 0, 0, 0, -50]
+                }}
+                transition={{
+                  duration: 4,
+                  times: [0, 0.2, 0.4, 0.45, 0.5],
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                <div className="relative">
+                  <motion.h2 
+                    className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent whitespace-nowrap"
+                    animate={{
+                      backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                    style={{
+                      backgroundSize: '200% 200%',
+                    }}
+                  >
+                    Full Stack Developer
+                  </motion.h2>
+                  
+                  {/* Particles */}
+                  <motion.div
+                    className="absolute -right-4 top-0 w-2 h-2 rounded-full bg-cyan-400"
+                    animate={{
+                      scale: [0, 1, 0],
+                      x: [0, 20, 40],
+                      y: [0, -10, -20],
+                      opacity: [0, 1, 0]
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      repeatDelay: 2.5
+                    }}
+                  />
+                </div>
+              </motion.div>
+
+              {/* UI/UX Designer */}
+              <motion.div 
+                className="absolute inset-0 flex items-center justify-center"
+                initial={{ opacity: 0, scale: 0.5, rotateX: 90 }}
+                animate={{ 
+                  opacity: [0, 0, 0, 0, 1, 1, 1, 0],
+                  scale: [0.5, 0.5, 0.5, 0.5, 1, 1, 1, 0.5],
+                  rotateX: [90, 90, 90, 90, 0, 0, 0, -90],
+                  y: [-50, -50, -50, -50, 0, 0, 0, 50]
+                }}
+                transition={{
+                  duration: 4,
+                  times: [0, 0.45, 0.5, 0.55, 0.7, 0.9, 0.95, 1],
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                <div className="relative">
+                  <motion.h2 
+                    className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent whitespace-nowrap"
+                    animate={{
+                      backgroundPosition: ['100% 50%', '0% 50%', '100% 50%'],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                    style={{
+                      backgroundSize: '200% 200%',
+                    }}
+                  >
+                    UI/UX Designer
+                  </motion.h2>
+                  
+                  {/* Particles */}
+                  <motion.div
+                    className="absolute -left-4 top-0 w-2 h-2 rounded-full bg-blue-400"
+                    animate={{
+                      scale: [0, 1, 0],
+                      x: [0, -20, -40],
+                      y: [0, -10, -20],
+                      opacity: [0, 1, 0]
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      repeatDelay: 2.5,
+                      delay: 2
+                    }}
+                  />
+                </div>
+              </motion.div>
+              
+              {/* Dynamic underline that follows active text */}
+              <motion.div
+                className="absolute bottom-2 left-1/2 -translate-x-1/2 h-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-500 rounded-full"
+                animate={{
+                  width: ["0%", "60%", "60%", "0%", "0%", "60%", "60%", "0%"],
+                  opacity: [0, 1, 1, 0, 0, 1, 1, 0]
+                }}
+                transition={{
+                  duration: 4,
+                  times: [0, 0.2, 0.45, 0.5, 0.55, 0.7, 0.95, 1],
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                style={{
+                  backgroundSize: '200% 200%',
+                }}
+              />
+            </div>
+
+            <motion.p 
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.9, duration: 0.5 }}
+              className="text-lg sm:text-xl text-gray-300 max-w-2xl leading-relaxed mt-6 lg:mx-0 mx-auto"
+            >
+              {personalInfo.tagline}
+            </motion.p>
+
+            {/* Social Links */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 1.1, duration: 0.5 }}
+              className="flex items-center justify-center lg:justify-start gap-4 mt-8"
+            >
+              {socialLinks.github && (
+                <motion.a
+                  href={socialLinks.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300"
+                  whileHover={{ scale: 1.1, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <FiGithub className="w-6 h-6 text-white" />
+                  <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-white/60 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    GitHub
+                  </span>
+                </motion.a>
+              )}
+              {socialLinks.linkedin && (
+                <motion.a
+                  href={socialLinks.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300"
+                  whileHover={{ scale: 1.1, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <FiLinkedin className="w-6 h-6 text-white" />
+                  <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-white/60 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    LinkedIn
+                  </span>
+                </motion.a>
+              )}
+              {socialLinks.leetcode && (
+                <motion.a
+                  href={socialLinks.leetcode}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300"
+                  whileHover={{ scale: 1.1, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <SiLeetcode className="w-6 h-6 text-white" />
+                  <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-white/60 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    LeetCode
+                  </span>
+                </motion.a>
+              )}
+              <motion.a
+                href={`mailto:${personalInfo.email}`}
+                className="group relative p-4 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 transition-all duration-300"
+                whileHover={{ scale: 1.1, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <FiMail className="w-6 h-6 text-white" />
+                <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-white/60 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  Email
+                </span>
+              </motion.a>
+            </motion.div>
+          </motion.div>
+          </div>
+
+          {/* Right Side - Profile Picture with Innovative Animations */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5, x: 100 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            transition={{ duration: 1, type: "spring", stiffness: 100 }}
+            className="flex justify-center lg:justify-end order-1 lg:order-2"
+          >
+            <div className="relative">
+              {/* Animated border glow */}
+              <motion.div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  boxShadow: "0 0 30px rgba(6, 182, 212, 0.6), inset 0 0 30px rgba(6, 182, 212, 0.3)"
+                }}
+                animate={{
+                  boxShadow: [
+                    "0 0 30px rgba(6, 182, 212, 0.6), inset 0 0 30px rgba(6, 182, 212, 0.3)",
+                    "0 0 50px rgba(14, 165, 233, 0.8), inset 0 0 50px rgba(14, 165, 233, 0.5)",
+                    "0 0 30px rgba(6, 182, 212, 0.6), inset 0 0 30px rgba(6, 182, 212, 0.3)"
+                  ]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+
+              {/* Static border */}
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  padding: "4px"
+                }}
+              >
+                <div
+                  className="w-full h-full rounded-full"
+                  style={{
+                    background: "linear-gradient(45deg, #06b6d4, #0ea5e9, #22d3ee, #06b6d4)",
+                    padding: "4px"
+                  }}
+                >
+                  <div className="w-full h-full rounded-full bg-slate-950" />
+                </div>
+              </div>
+
+              {/* Main profile container */}
+              <div
+                className="relative w-72 h-72 sm:w-80 sm:h-80 lg:w-96 lg:h-96 rounded-full overflow-hidden shadow-2xl"
+              >
+                {/* Profile image */}
                 <img
                   src={personalInfo.avatar}
                   alt={personalInfo.name}
@@ -104,110 +383,6 @@ const HeroNew = () => {
                 />
               </div>
             </div>
-          </motion.div>
-
-          {/* Greeting */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="mb-4"
-          >
-            <span className="inline-block px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-purple-300 text-sm font-medium">
-              👋 Welcome to my portfolio
-            </span>
-          </motion.div>
-
-          {/* Name */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6"
-          >
-            <span className="bg-gradient-to-r from-white via-blue-200 to-cyan-200 bg-clip-text text-transparent">
-              {personalInfo.name}
-            </span>
-          </motion.h1>
-
-          {/* Title */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            className="mb-8"
-          >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-purple-300 mb-4">
-              {personalInfo.title}
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-              {personalInfo.tagline}
-            </p>
-          </motion.div>
-
-          {/* Social Links */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-            className="flex items-center justify-center gap-4 mb-12"
-          >
-            {socialLinks.github && (
-              <motion.a
-                href={socialLinks.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300"
-                whileHover={{ scale: 1.1, y: -5 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <FiGithub className="w-6 h-6 text-white" />
-                <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-white/60 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  GitHub
-                </span>
-              </motion.a>
-            )}
-            {socialLinks.linkedin && (
-              <motion.a
-                href={socialLinks.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300"
-                whileHover={{ scale: 1.1, y: -5 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <FiLinkedin className="w-6 h-6 text-white" />
-                <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-white/60 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  LinkedIn
-                </span>
-              </motion.a>
-            )}
-            {socialLinks.leetcode && (
-              <motion.a
-                href={socialLinks.leetcode}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300"
-                whileHover={{ scale: 1.1, y: -5 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <SiLeetcode className="w-6 h-6 text-white" />
-                <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-white/60 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  LeetCode
-                </span>
-              </motion.a>
-            )}
-            <motion.a
-              href={`mailto:${personalInfo.email}`}
-              className="group relative p-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
-              whileHover={{ scale: 1.1, y: -5 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <FiMail className="w-6 h-6 text-white" />
-              <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-white/60 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Email
-              </span>
-            </motion.a>
           </motion.div>
         </div>
       </div>

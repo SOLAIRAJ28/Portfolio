@@ -189,6 +189,28 @@ Reference: ${tokenId}
   }
 });
 
+// Cleanup endpoint - remove status field from all messages
+app.post('/api/cleanup/remove-status', async (req, res) => {
+  try {
+    const result = await Message.updateMany(
+      {},
+      { $unset: { status: "" } }
+    );
+    
+    res.json({ 
+      success: true, 
+      message: 'Status field removed from all messages',
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('Cleanup error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Cleanup failed' 
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
