@@ -1,5 +1,5 @@
 import express from 'express';
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
@@ -35,39 +35,13 @@ const connectDB = async () => {
 
 connectDB();
 
-// Email configuration with Render-compatible settings
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // Use STARTTLS
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD, // Gmail App Password
-  },
-  pool: true, // Use connection pooling
-  maxConnections: 1,
-  maxMessages: 3,
-  rateDelta: 1000,
-  rateLimit: 1,
-  connectionTimeout: 60000, // 60 seconds
-  greetingTimeout: 30000,
-  socketTimeout: 60000,
-  tls: {
-    rejectUnauthorized: false,
-    ciphers: 'SSLv3'
-  },
-  debug: true, // Enable debug logs
-  logger: true
-});
-
-// Verify email configuration (don't block server startup)
-transporter.verify((error, success) => {
-  if (error) {
-    console.log('⚠️  Email verification failed (will retry on send):', error.message);
-  } else {
-    console.log('✅ Email server is ready to send messages');
-  }
-});
+// Initialize SendGrid with API key
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  console.log('✅ SendGrid initialized successfully');
+} else {
+  console.log('⚠️  SENDGRID_API_KEY not found - email sending will be disabled');
+}
 
 // Email endpoint
 app.post('/api/send-email', async (req, res) => {
@@ -113,13 +87,20 @@ app.post('/api/send-email', async (req, res) => {
       tokenId: tokenId
     });
 
-    // Try to send email asynchronously
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: 'solairaj495@gmail.com',
-      replyTo: email,
-      subject: `Portfolio Contact from ${name} [${tokenId}]`,
-      html: `
+
+    // Send email with SendGrid (works on Render!)
+    try {
+      console.log(`📧 Attempting to send email for ${tokenId}...`);
+      
+      if (!process.env.SENDGRID_API_KEY) {
+        console.log('⚠️  SendGrid not configured - skipping email send');
+      } else {
+        const msg = {
+          to: process.env.EMAIL_TO || 'solairaj495@gmail.com',
+          from: process.env.EMAIL_FROM || 'solairaj495@gmail.com', // Must be verified in SendGrid
+          replyTo: email,
+          subject: `Portfolio Contact from ${name} [${tokenId}]`,
+          html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb; border-radius: 10px;">
         <div style="background: linear-gradient(135deg, #1e40af 0%, #06b6d4 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
           <h1 style="color: white; margin: 0; font-size: 24px;">New Portfolio Message</h1>
@@ -167,7 +148,7 @@ app.post('/api/send-email', async (req, res) => {
         </div>
       </div>
     `,
-      text: `
+          text: `
 New Portfolio Message
 Token ID: ${tokenId}
 
@@ -181,28 +162,21 @@ ${message}
 Reply to this email to respond to ${name}
 Reference: ${tokenId}
     `,
-    };
+        };
 
-    // Send email with proper error handling and logging
-    try {
-      console.log(`📧 Attempting to send email for ${tokenId}...`);
-      const info = await transporter.sendMail(mailOptions);
-      
-      // Update database to mark email as sent
-      newMessage.emailSent = true;
-      await newMessage.save();
-      
-      console.log(`✅ Email sent successfully for ${tokenId}`);
-      console.log(`📬 Email response: ${info.response}`);
-      console.log(`📨 Message ID: ${info.messageId}`);
+        await sgMail.send(msg);
+        
+        // Update database to mark email as sent
+        newMessage.emailSent = true;
+        await newMessage.save();
+        
+        console.log(`✅ Email sent successfully for ${tokenId}`);
+      }
     } catch (emailError) {
       console.error(`❌ Email sending failed for ${tokenId}:`, emailError.message);
-      console.error(`📋 Error details:`, {
-        code: emailError.code,
-        command: emailError.command,
-        response: emailError.response,
-        responseCode: emailError.responseCode
-      });
+      if (emailError.response) {
+        console.error(`📋 SendGrid Error:`, emailError.response.body);
+      }
       // Don't throw - message is already saved, email failure shouldn't break the response
     }
 
