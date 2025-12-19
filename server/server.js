@@ -1,5 +1,5 @@
 import express from 'express';
-import sgMail from '@sendgrid/mail';
+import nodemailer from 'nodemailer';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
@@ -35,12 +35,59 @@ const connectDB = async () => {
 
 connectDB();
 
-// Initialize SendGrid with API key
-if (process.env.SENDGRID_API_KEY) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-  console.log('✅ SendGrid initialized successfully');
+// Email configuration - supports multiple SMTP providers
+// Priority: Brevo (works on Render) > Gmail > Custom SMTP
+const getEmailConfig = () => {
+  // Option 1: Brevo (Sendinblue) - FREE and works on Render!
+  if (process.env.BREVO_SMTP_KEY) {
+    return {
+      host: 'smtp-relay.brevo.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.BREVO_SMTP_USER || process.env.EMAIL_USER,
+        pass: process.env.BREVO_SMTP_KEY,
+      },
+    };
+  }
+  
+  // Option 2: Gmail (may not work on Render due to port blocking)
+  if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+    return {
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+      tls: {
+        rejectUnauthorized: false
+      }
+    };
+  }
+  
+  return null;
+};
+
+const emailConfig = getEmailConfig();
+let transporter = null;
+
+if (emailConfig) {
+  transporter = nodemailer.createTransport(emailConfig);
+  
+  // Verify email configuration
+  transporter.verify((error, success) => {
+    if (error) {
+      console.log('⚠️  Email verification failed:', error.message);
+      console.log('💡 Tip: Use Brevo SMTP for Render deployment (free & reliable)');
+    } else {
+      console.log('✅ Email server is ready to send messages');
+    }
+  });
 } else {
-  console.log('⚠️  SENDGRID_API_KEY not found - email sending will be disabled');
+  console.log('⚠️  No email configuration found - email sending will be disabled');
+  console.log('💡 Add BREVO_SMTP_KEY or EMAIL_USER/EMAIL_PASSWORD to enable emails');
 }
 
 // Email endpoint
@@ -88,16 +135,16 @@ app.post('/api/send-email', async (req, res) => {
     });
 
 
-    // Send email with SendGrid (works on Render!)
+    // Send email asynchronously
     try {
       console.log(`📧 Attempting to send email for ${tokenId}...`);
       
-      if (!process.env.SENDGRID_API_KEY) {
-        console.log('⚠️  SendGrid not configured - skipping email send');
+      if (!transporter) {
+        console.log('⚠️  Email not configured - skipping email send');
       } else {
-        const msg = {
+        const mailOptions = {
+          from: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'solairaj495@gmail.com',
           to: process.env.EMAIL_TO || 'solairaj495@gmail.com',
-          from: process.env.EMAIL_FROM || 'solairaj495@gmail.com', // Must be verified in SendGrid
           replyTo: email,
           subject: `Portfolio Contact from ${name} [${tokenId}]`,
           html: `
@@ -164,18 +211,19 @@ Reference: ${tokenId}
     `,
         };
 
-        await sgMail.send(msg);
+        const info = await transporter.sendMail(mailOptions);
         
         // Update database to mark email as sent
         newMessage.emailSent = true;
         await newMessage.save();
         
         console.log(`✅ Email sent successfully for ${tokenId}`);
+        console.log(`📨 Message ID: ${info.messageId}`);
       }
     } catch (emailError) {
       console.error(`❌ Email sending failed for ${tokenId}:`, emailError.message);
-      if (emailError.response) {
-        console.error(`📋 SendGrid Error:`, emailError.response.body);
+      if (emailError.code === 'ETIMEDOUT') {
+        console.error('💡 SMTP timeout - Consider using Brevo SMTP for Render deployment');
       }
       // Don't throw - message is already saved, email failure shouldn't break the response
     }
