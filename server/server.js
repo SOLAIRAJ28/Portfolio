@@ -172,13 +172,28 @@ Reference: ${tokenId}
     `,
     };
 
-    transporter.sendMail(mailOptions, async (error, info) => {
-      if (!error) {
-        newMessage.emailSent = true;
-        await newMessage.save();
-        console.log(`✅ Email sent successfully for ${tokenId}`);
-      }
-    });
+    // Send email with proper error handling and logging
+    try {
+      console.log(`📧 Attempting to send email for ${tokenId}...`);
+      const info = await transporter.sendMail(mailOptions);
+      
+      // Update database to mark email as sent
+      newMessage.emailSent = true;
+      await newMessage.save();
+      
+      console.log(`✅ Email sent successfully for ${tokenId}`);
+      console.log(`📬 Email response: ${info.response}`);
+      console.log(`📨 Message ID: ${info.messageId}`);
+    } catch (emailError) {
+      console.error(`❌ Email sending failed for ${tokenId}:`, emailError.message);
+      console.error(`📋 Error details:`, {
+        code: emailError.code,
+        command: emailError.command,
+        response: emailError.response,
+        responseCode: emailError.responseCode
+      });
+      // Don't throw - message is already saved, email failure shouldn't break the response
+    }
 
   } catch (error) {
     console.error('❌ Database error:', error);
