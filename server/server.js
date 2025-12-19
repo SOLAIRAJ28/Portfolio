@@ -45,8 +45,16 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASSWORD, // Gmail App Password
   },
   tls: {
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false,
+    ciphers: 'SSLv3'
+  },
+  connectionTimeout: 10000, // 10 seconds
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
+  pool: true,
+  maxConnections: 1,
+  rateDelta: 20000,
+  rateLimit: 5
 });
 
 // Verify email configuration (don't block server startup)
