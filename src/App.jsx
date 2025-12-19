@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import FloatingContact from './components/layout/FloatingContact';
@@ -6,6 +7,7 @@ import ScrollToTop from './components/layout/ScrollToTop';
 import ScrollProgressBar from './components/layout/ScrollProgressBar';
 import CustomCursor from './components/layout/CustomCursor';
 import ParticleBackground from './components/layout/ParticleBackground';
+import IntroLoader from './components/layout/IntroLoader';
 import HeroNew from './components/sections/HeroNew';
 import AboutNew from './components/sections/AboutNew';
 import SkillsExperience from './components/sections/SkillsExperience';
@@ -14,14 +16,22 @@ import CertificationsNew from './components/sections/CertificationsNew';
 import Contact from './components/sections/Contact';
 
 function App() {
+  const [showLoader, setShowLoader] = useState(true);
+
   return (
-    <AnimatePresence>
-      <motion.div 
-        className="relative min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
+    <>
+      {/* Intro Loader */}
+      <IntroLoader onComplete={() => setShowLoader(false)} />
+
+      {/* Main Content */}
+      <AnimatePresence>
+        {!showLoader && (
+          <motion.div 
+            className="relative min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+          >
         {/* Scroll Progress Bar */}
         <ScrollProgressBar />
         
@@ -90,8 +100,10 @@ function App() {
         {/* Floating Elements */}
         <FloatingContact />
         <ScrollToTop />
-      </motion.div>
-    </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 

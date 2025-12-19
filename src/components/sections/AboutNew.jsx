@@ -222,8 +222,90 @@ const AboutNew = () => {
             {/* Soft Skills */}
             <div className="rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-500">
-                  <FiHeart className="w-6 h-6 text-white" />
+                <div className="relative p-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 overflow-visible">
+                  {/* Innovative 3D Heart with Orbital Particles */}
+                  <div className="relative w-6 h-6">
+                    {/* Orbiting particles */}
+                    {[...Array(3)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute w-1.5 h-1.5 rounded-full bg-white"
+                        style={{
+                          top: '50%',
+                          left: '50%',
+                        }}
+                        animate={{
+                          x: [
+                            Math.cos((i * 120 * Math.PI) / 180) * 20,
+                            Math.cos(((i * 120 + 360) * Math.PI) / 180) * 20,
+                          ],
+                          y: [
+                            Math.sin((i * 120 * Math.PI) / 180) * 20,
+                            Math.sin(((i * 120 + 360) * Math.PI) / 180) * 20,
+                          ],
+                          scale: [1, 1.5, 1],
+                          opacity: [0.3, 1, 0.3],
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          delay: i * 0.3,
+                          ease: "easeInOut"
+                        }}
+                      />
+                    ))}
+                    
+                    {/* Main 3D rotating heart */}
+                    <motion.div
+                      className="absolute inset-0"
+                      animate={{
+                        rotateY: [0, 360],
+                        scale: [1, 1.2, 1],
+                      }}
+                      transition={{
+                        rotateY: { duration: 4, repeat: Infinity, ease: "linear" },
+                        scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                      }}
+                      style={{
+                        transformStyle: "preserve-3d",
+                      }}
+                    >
+                      <FiHeart className="w-6 h-6 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.9)]" />
+                    </motion.div>
+
+                    {/* Pulsing rings */}
+                    {[...Array(2)].map((_, i) => (
+                      <motion.div
+                        key={`ring-${i}`}
+                        className="absolute inset-0 rounded-full border-2 border-white/40"
+                        animate={{
+                          scale: [1, 2.5],
+                          opacity: [0.6, 0],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          delay: i * 1,
+                          ease: "easeOut"
+                        }}
+                      />
+                    ))}
+
+                    {/* Rotating glow backdrop */}
+                    <motion.div
+                      className="absolute inset-0 -z-10"
+                      animate={{
+                        rotate: [0, 360],
+                      }}
+                      transition={{
+                        duration: 6,
+                        repeat: Infinity,
+                        ease: "linear"
+                      }}
+                    >
+                      <div className="w-full h-full bg-gradient-to-r from-orange-300/60 via-red-300/60 to-pink-300/60 rounded-full blur-lg" />
+                    </motion.div>
+                  </div>
                 </div>
                 <h3 className="text-2xl font-bold text-white">Soft Skills</h3>
               </div>

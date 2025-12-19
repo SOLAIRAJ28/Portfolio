@@ -88,18 +88,6 @@ const HeroNew = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Side - Text Content */}
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left order-2 lg:order-1">
-            {/* Greeting */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="mb-4"
-            >
-              <span className="inline-block px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-cyan-300 text-sm font-medium">
-                👋 Welcome to my portfolio
-              </span>
-            </motion.div>
-
           {/* Name */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
