@@ -1,6 +1,5 @@
 import express from 'express';
 import nodemailer from 'nodemailer';
-import { Resend } from 'resend';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
@@ -36,11 +35,28 @@ const connectDB = async () => {
 
 connectDB();
 
-// Initialize Resend (works on Render free tier - no SMTP blocking)
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Email configuration
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false, // Use TLS
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD, // Gmail App Password
+  },
+  tls: {
+    rejectUnauthorized: false
+  }
+});
 
-console.log('✅ Email service initialized with Resend API');
-
+// Verify email configuration (don't block server startup)
+transporter.verify((error, success) => {
+  if (error) {
+    console.log('⚠️  Email verification failed (will retry on send):', error.message);
+  } else {
+    console.log('✅ Email server is ready to send messages');
+  }
+});
 
 // Email endpoint
 app.post('/api/send-email', async (req, res) => {
@@ -156,31 +172,26 @@ Reference: ${tokenId}
     `,
     };
 
-    // Send email using Resend API (bypasses SMTP port blocking)
+    // Send email with proper error handling and logging
     try {
       console.log(`📧 Attempting to send email for ${tokenId}...`);
-      
-      const { data, error: resendError } = await resend.emails.send({
-        from: 'Portfolio Contact <onboarding@resend.dev>', // Resend's test domain
-        to: ['solairaj495@gmail.com'],
-        replyTo: email,
-        subject: `Portfolio Contact from ${name} [${tokenId}]`,
-        html: mailOptions.html,
-      });
-
-      if (resendError) {
-        throw resendError;
-      }
+      const info = await transporter.sendMail(mailOptions);
       
       // Update database to mark email as sent
       newMessage.emailSent = true;
       await newMessage.save();
       
       console.log(`✅ Email sent successfully for ${tokenId}`);
-      console.log(`📬 Email ID: ${data.id}`);
+      console.log(`📬 Email response: ${info.response}`);
+      console.log(`📨 Message ID: ${info.messageId}`);
     } catch (emailError) {
       console.error(`❌ Email sending failed for ${tokenId}:`, emailError.message);
-      console.error(`📋 Error details:`, emailError);
+      console.error(`📋 Error details:`, {
+        code: emailError.code,
+        command: emailError.command,
+        response: emailError.response,
+        responseCode: emailError.responseCode
+      });
       // Don't throw - message is already saved, email failure shouldn't break the response
     }
 

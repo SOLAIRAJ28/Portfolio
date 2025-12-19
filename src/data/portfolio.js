@@ -11,8 +11,8 @@ export const personalInfo = {
 
 export const socialLinks = {
   github: "https://github.com/SOLAIRAJ28",
-  linkedin: "https://linkedin.com/in/solairaj-r-254529247",
-  leetcode: "https://leetcode.com/u/SOLAIRAJ28",
+  linkedin: "https://www.linkedin.com/in/solairaj-r-754523291",
+  leetcode: "https://leetcode.com/u/SOLAIRAJ2804/",
   email: "mailto:solairaj495@gmail.com",
 };
 
