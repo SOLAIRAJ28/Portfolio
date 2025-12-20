@@ -1,5 +1,4 @@
 import express from 'express';
-import nodemailer from 'nodemailer';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
@@ -7,6 +6,7 @@ import { nanoid } from 'nanoid';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import Message from './models/Message.js';
+import SibApiV3Sdk from '@sendinblue/client';
 
 // Get directory name for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -35,70 +35,23 @@ const connectDB = async () => {
 
 connectDB();
 
-// Email configuration - ONLY Brevo SMTP (works on Render)
-const getEmailConfig = () => {
-  // Only use Brevo SMTP - ignore any Gmail variables
-  if (process.env.BREVO_SMTP_KEY && process.env.BREVO_SMTP_USER) {
-    console.log('📧 Using Brevo SMTP configuration');
-    console.log('   User:', process.env.BREVO_SMTP_USER);
-    console.log('   Host: smtp-relay.brevo.com');
-    console.log('   Port: 465 (SSL)');
-    return {
-      host: 'smtp-relay.brevo.com',
-      port: 465, // Use SSL port instead of STARTTLS
-      secure: true, // Use SSL
-      auth: {
-        user: process.env.BREVO_SMTP_USER,
-        pass: process.env.BREVO_SMTP_KEY,
-      },
-      // Timeout settings for Render deployment
-      connectionTimeout: 30000, // 30 seconds (increased)
-      greetingTimeout: 30000,   // 30 seconds
-      socketTimeout: 30000,     // 30 seconds
-      // TLS options
-      tls: {
-        rejectUnauthorized: false // Allow self-signed certificates
-      },
-      // Pool settings for better performance
-      pool: true,
-      maxConnections: 5,
-      maxMessages: 100,
-    };
-  }
-  
-  console.log('⚠️  Brevo SMTP not configured');
-  console.log('   Required: BREVO_SMTP_KEY and BREVO_SMTP_USER');
-  return null;
-};
+// Brevo API Configuration (uses HTTPS - works on Render!)
+let brevoClient = null;
 
-const emailConfig = getEmailConfig();
-let transporter = null;
-
-if (emailConfig) {
-  transporter = nodemailer.createTransport(emailConfig);
+if (process.env.BREVO_API_KEY || process.env.BREVO_SMTP_KEY) {
+  const apiKey = process.env.BREVO_API_KEY || process.env.BREVO_SMTP_KEY;
   
-  // Verify email configuration asynchronously (non-blocking)
-  const verifyEmail = async () => {
-    try {
-      const verifyPromise = transporter.verify();
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Verification timeout')), 5000)
-      );
-      
-      await Promise.race([verifyPromise, timeoutPromise]);
-      console.log('✅ Email server is ready to send messages');
-    } catch (error) {
-      console.log('⚠️  Email verification failed:', error.message);
-      console.log('💡 This is normal on Render - emails will still work');
-      console.log('📧 Brevo SMTP is configured and ready');
-    }
-  };
+  console.log('📧 Using Brevo API configuration');
+  console.log('   Method: REST API (HTTPS)');
+  console.log('   API Key:', apiKey.substring(0, 20) + '...');
   
-  // Run verification in background
-  verifyEmail();
+  brevoClient = new SibApiV3Sdk.TransactionalEmailsApi();
+  brevoClient.setApiKey(SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey, apiKey);
+  
+  console.log('✅ Brevo API client initialized');
 } else {
-  console.log('⚠️  No email configuration found - email sending will be disabled');
-  console.log('💡 Add BREVO_SMTP_KEY or EMAIL_USER/EMAIL_PASSWORD to enable emails');
+  console.log('⚠️  Brevo API not configured');
+  console.log('💡 Add BREVO_API_KEY or BREVO_SMTP_KEY to enable emails');
 }
 
 // Email endpoint
@@ -146,19 +99,14 @@ app.post('/api/send-email', async (req, res) => {
     });
 
 
-    // Send email asynchronously
+    // Send email asynchronously using Brevo API
     try {
       console.log(`📧 Attempting to send email for ${tokenId}...`);
       
-      if (!transporter) {
-        console.log('⚠️  Email not configured - skipping email send');
+      if (!brevoClient) {
+        console.log('⚠️  Brevo API not configured - skipping email send');
       } else {
-        const mailOptions = {
-          from: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'solairaj495@gmail.com',
-          to: process.env.EMAIL_TO || 'solairaj495@gmail.com',
-          replyTo: email,
-          subject: `Portfolio Contact from ${name} [${tokenId}]`,
-          html: `
+        const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb; border-radius: 10px;">
         <div style="background: linear-gradient(135deg, #1e40af 0%, #06b6d4 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
           <h1 style="color: white; margin: 0; font-size: 24px;">New Portfolio Message</h1>
@@ -205,8 +153,20 @@ app.post('/api/send-email', async (req, res) => {
           <p>Reference: ${tokenId}</p>
         </div>
       </div>
-    `,
-          text: `
+    `;
+
+        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+        sendSmtpEmail.sender = { 
+          email: process.env.EMAIL_FROM || 'solairaj495@gmail.com',
+          name: 'Portfolio Contact Form'
+        };
+        sendSmtpEmail.to = [{ 
+          email: process.env.EMAIL_TO || 'solairaj495@gmail.com'
+        }];
+        sendSmtpEmail.replyTo = { email: email, name: name };
+        sendSmtpEmail.subject = `Portfolio Contact from ${name} [${tokenId}]`;
+        sendSmtpEmail.htmlContent = htmlContent;
+        sendSmtpEmail.textContent = `
 New Portfolio Message
 Token ID: ${tokenId}
 
@@ -219,25 +179,20 @@ ${message}
 ---
 Reply to this email to respond to ${name}
 Reference: ${tokenId}
-    `,
-        };
+        `;
 
-        const info = await transporter.sendMail(mailOptions);
+        const result = await brevoClient.sendTransacEmail(sendSmtpEmail);
         
         // Update database to mark email as sent
         newMessage.emailSent = true;
         await newMessage.save();
         
         console.log(`✅ Email sent successfully for ${tokenId}`);
-        console.log(`📨 Message ID: ${info.messageId}`);
+        console.log(`📨 Message ID: ${result.messageId}`);
       }
     } catch (emailError) {
       console.error(`❌ Email sending failed for ${tokenId}:`, emailError.message);
-      console.error('   Error code:', emailError.code);
-      console.error('   Error details:', emailError);
-      if (emailError.code === 'ETIMEDOUT') {
-        console.error('💡 SMTP timeout - Consider using Brevo SMTP for Render deployment');
-      }
+      console.error('   Error details:', emailError.response?.body || emailError);
       // Don't throw - message is already saved, email failure shouldn't break the response
     }
 
@@ -292,30 +247,24 @@ app.get('/api/messages', async (req, res) => {
 
 // Email configuration diagnostic endpoint
 app.get('/api/email-config', async (req, res) => {
+  const apiKey = process.env.BREVO_API_KEY || process.env.BREVO_SMTP_KEY;
+  
   const config = {
-    configured: !!transporter,
-    hasBrevoKey: !!process.env.BREVO_SMTP_KEY,
-    hasBrevoUser: !!process.env.BREVO_SMTP_USER,
-    brevoUser: process.env.BREVO_SMTP_USER || 'Not set',
-    emailFrom: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'solairaj495@gmail.com',
+    configured: !!brevoClient,
+    method: 'Brevo REST API (HTTPS)',
+    hasApiKey: !!apiKey,
+    apiKeyPreview: apiKey ? apiKey.substring(0, 20) + '...' : 'Not set',
+    emailFrom: process.env.EMAIL_FROM || 'solairaj495@gmail.com',
     emailTo: process.env.EMAIL_TO || 'solairaj495@gmail.com',
   };
 
-  // Test connection if transporter exists
-  if (transporter) {
-    try {
-      await transporter.verify();
-      config.connectionTest = 'SUCCESS';
-      config.message = 'SMTP connection verified successfully';
-    } catch (error) {
-      config.connectionTest = 'FAILED';
-      config.error = error.message;
-      config.errorCode = error.code;
-      config.message = 'SMTP connection failed - check credentials';
-    }
+  // Brevo API is always ready if configured (no connection test needed for REST API)
+  if (brevoClient) {
+    config.status = 'READY';
+    config.message = 'Brevo API is configured and ready to send emails';
   } else {
-    config.connectionTest = 'NOT_CONFIGURED';
-    config.message = 'Email transporter not configured';
+    config.status = 'NOT_CONFIGURED';
+    config.message = 'Brevo API not configured - add BREVO_API_KEY or BREVO_SMTP_KEY';
   }
 
   res.json(config);
