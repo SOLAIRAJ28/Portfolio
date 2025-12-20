@@ -35,43 +35,27 @@ const connectDB = async () => {
 
 connectDB();
 
-// Email configuration - supports multiple SMTP providers
-// Priority: Brevo (works on Render) > Gmail > Custom SMTP
+// Email configuration - ONLY Brevo SMTP (works on Render)
 const getEmailConfig = () => {
-  // Option 1: Brevo (Sendinblue) - FREE and works on Render!
-  if (process.env.BREVO_SMTP_KEY) {
+  // Only use Brevo SMTP - ignore any Gmail variables
+  if (process.env.BREVO_SMTP_KEY && process.env.BREVO_SMTP_USER) {
     console.log('📧 Using Brevo SMTP configuration');
-    console.log('   User:', process.env.BREVO_SMTP_USER || process.env.EMAIL_USER);
+    console.log('   User:', process.env.BREVO_SMTP_USER);
+    console.log('   Host: smtp-relay.brevo.com');
+    console.log('   Port: 587');
     return {
       host: 'smtp-relay.brevo.com',
       port: 587,
       secure: false,
       auth: {
-        user: process.env.BREVO_SMTP_USER || process.env.EMAIL_USER,
+        user: process.env.BREVO_SMTP_USER,
         pass: process.env.BREVO_SMTP_KEY,
       },
     };
   }
   
-  // Option 2: Gmail (may not work on Render due to port blocking)
-  if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
-    console.log('📧 Using Gmail SMTP configuration');
-    console.log('   User:', process.env.EMAIL_USER);
-    return {
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-      tls: {
-        rejectUnauthorized: false
-      }
-    };
-  }
-  
-  console.log('⚠️  No email configuration found');
+  console.log('⚠️  Brevo SMTP not configured');
+  console.log('   Required: BREVO_SMTP_KEY and BREVO_SMTP_USER');
   return null;
 };
 
