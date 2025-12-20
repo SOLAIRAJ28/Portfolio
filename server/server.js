@@ -259,6 +259,24 @@ app.post('/api/cleanup/remove-status', async (req, res) => {
   }
 });
 
+// Get all messages endpoint (for debugging)
+app.get('/api/messages', async (req, res) => {
+  try {
+    const messages = await Message.find().sort({ createdAt: -1 }).limit(20);
+    res.json({ 
+      success: true, 
+      count: messages.length,
+      messages: messages 
+    });
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch messages' 
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
