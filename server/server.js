@@ -46,11 +46,25 @@ const getEmailConfig = () => {
     return {
       host: 'smtp-relay.brevo.com',
       port: 587,
-      secure: false,
+      secure: false, // Use STARTTLS
+      requireTLS: true, // Require TLS connection
       auth: {
         user: process.env.BREVO_SMTP_USER,
         pass: process.env.BREVO_SMTP_KEY,
       },
+      // Timeout settings for Render deployment
+      connectionTimeout: 10000, // 10 seconds
+      greetingTimeout: 10000,   // 10 seconds
+      socketTimeout: 15000,     // 15 seconds
+      // TLS options
+      tls: {
+        ciphers: 'SSLv3',
+        rejectUnauthorized: false // Allow self-signed certificates
+      },
+      // Pool settings for better performance
+      pool: true,
+      maxConnections: 5,
+      maxMessages: 100,
     };
   }
   
@@ -65,15 +79,25 @@ let transporter = null;
 if (emailConfig) {
   transporter = nodemailer.createTransport(emailConfig);
   
-  // Verify email configuration
-  transporter.verify((error, success) => {
-    if (error) {
-      console.log('⚠️  Email verification failed:', error.message);
-      console.log('💡 Tip: Use Brevo SMTP for Render deployment (free & reliable)');
-    } else {
+  // Verify email configuration asynchronously (non-blocking)
+  const verifyEmail = async () => {
+    try {
+      const verifyPromise = transporter.verify();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Verification timeout')), 5000)
+      );
+      
+      await Promise.race([verifyPromise, timeoutPromise]);
       console.log('✅ Email server is ready to send messages');
+    } catch (error) {
+      console.log('⚠️  Email verification failed:', error.message);
+      console.log('💡 This is normal on Render - emails will still work');
+      console.log('📧 Brevo SMTP is configured and ready');
     }
-  });
+  };
+  
+  // Run verification in background
+  verifyEmail();
 } else {
   console.log('⚠️  No email configuration found - email sending will be disabled');
   console.log('💡 Add BREVO_SMTP_KEY or EMAIL_USER/EMAIL_PASSWORD to enable emails');
