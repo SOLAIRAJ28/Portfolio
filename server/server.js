@@ -40,6 +40,8 @@ connectDB();
 const getEmailConfig = () => {
   // Option 1: Brevo (Sendinblue) - FREE and works on Render!
   if (process.env.BREVO_SMTP_KEY) {
+    console.log('📧 Using Brevo SMTP configuration');
+    console.log('   User:', process.env.BREVO_SMTP_USER || process.env.EMAIL_USER);
     return {
       host: 'smtp-relay.brevo.com',
       port: 587,
@@ -53,6 +55,8 @@ const getEmailConfig = () => {
   
   // Option 2: Gmail (may not work on Render due to port blocking)
   if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+    console.log('📧 Using Gmail SMTP configuration');
+    console.log('   User:', process.env.EMAIL_USER);
     return {
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.SMTP_PORT || '587'),
@@ -67,6 +71,7 @@ const getEmailConfig = () => {
     };
   }
   
+  console.log('⚠️  No email configuration found');
   return null;
 };
 
@@ -222,6 +227,8 @@ Reference: ${tokenId}
       }
     } catch (emailError) {
       console.error(`❌ Email sending failed for ${tokenId}:`, emailError.message);
+      console.error('   Error code:', emailError.code);
+      console.error('   Error details:', emailError);
       if (emailError.code === 'ETIMEDOUT') {
         console.error('💡 SMTP timeout - Consider using Brevo SMTP for Render deployment');
       }
