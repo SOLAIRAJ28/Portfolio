@@ -35,7 +35,6 @@ const messageSchema = new mongoose.Schema({
 
 // Index for searching
 messageSchema.index({ email: 1, createdAt: -1 });
-messageSchema.index({ tokenId: 1 });
 
 const Message = mongoose.model('Message', messageSchema);
 
