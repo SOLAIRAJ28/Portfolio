@@ -12,7 +12,7 @@ import Message from './models/Message.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Load .env from parent directory
+// Load .env from parent directory (or use Render environment variables)
 dotenv.config({ path: join(__dirname, '..', '.env') });
 
 const app = express();
