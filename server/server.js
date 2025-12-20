@@ -42,23 +42,21 @@ const getEmailConfig = () => {
     console.log('📧 Using Brevo SMTP configuration');
     console.log('   User:', process.env.BREVO_SMTP_USER);
     console.log('   Host: smtp-relay.brevo.com');
-    console.log('   Port: 587');
+    console.log('   Port: 465 (SSL)');
     return {
       host: 'smtp-relay.brevo.com',
-      port: 587,
-      secure: false, // Use STARTTLS
-      requireTLS: true, // Require TLS connection
+      port: 465, // Use SSL port instead of STARTTLS
+      secure: true, // Use SSL
       auth: {
         user: process.env.BREVO_SMTP_USER,
         pass: process.env.BREVO_SMTP_KEY,
       },
       // Timeout settings for Render deployment
-      connectionTimeout: 10000, // 10 seconds
-      greetingTimeout: 10000,   // 10 seconds
-      socketTimeout: 15000,     // 15 seconds
+      connectionTimeout: 30000, // 30 seconds (increased)
+      greetingTimeout: 30000,   // 30 seconds
+      socketTimeout: 30000,     // 30 seconds
       // TLS options
       tls: {
-        ciphers: 'SSLv3',
         rejectUnauthorized: false // Allow self-signed certificates
       },
       // Pool settings for better performance
