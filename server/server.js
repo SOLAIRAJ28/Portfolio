@@ -292,6 +292,37 @@ app.get('/api/messages', async (req, res) => {
   }
 });
 
+// Email configuration diagnostic endpoint
+app.get('/api/email-config', async (req, res) => {
+  const config = {
+    configured: !!transporter,
+    hasBrevoKey: !!process.env.BREVO_SMTP_KEY,
+    hasBrevoUser: !!process.env.BREVO_SMTP_USER,
+    brevoUser: process.env.BREVO_SMTP_USER || 'Not set',
+    emailFrom: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'solairaj495@gmail.com',
+    emailTo: process.env.EMAIL_TO || 'solairaj495@gmail.com',
+  };
+
+  // Test connection if transporter exists
+  if (transporter) {
+    try {
+      await transporter.verify();
+      config.connectionTest = 'SUCCESS';
+      config.message = 'SMTP connection verified successfully';
+    } catch (error) {
+      config.connectionTest = 'FAILED';
+      config.error = error.message;
+      config.errorCode = error.code;
+      config.message = 'SMTP connection failed - check credentials';
+    }
+  } else {
+    config.connectionTest = 'NOT_CONFIGURED';
+    config.message = 'Email transporter not configured';
+  }
+
+  res.json(config);
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
