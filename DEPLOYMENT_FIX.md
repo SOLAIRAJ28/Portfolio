@@ -27,11 +27,11 @@ fetch(`${apiUrl}/api/send-email`)
 
 **Environment Variables:**
 ```
-BREVO_API_KEY=xkeysib-c2d2065c8d6fc94f7968204e4f15db5b4a8a1a53a252e19c9f114e4e6e-ZcTB2yoQNwN7Zr7
-MONGODB_URI=mongodb+srv://solairaj495:PASSWORD@cluster.mongodb.net/happherecluster8
+BREVO_API_KEY=your_brevo_api_key_here
+MONGODB_URI=your_mongodb_connection_string_here
 NODE_ENV=production
 PORT=5000
-EMAIL_TO=solairaj495@gmail.com
+EMAIL_TO=your_email@example.com
 ```
 
 ### **Frontend (Static Site)**
