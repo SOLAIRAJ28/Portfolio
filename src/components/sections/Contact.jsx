@@ -37,7 +37,8 @@ const Contact = () => {
     setStatus('');
 
     try {
-      const response = await fetch('https://portfolio-backend-hy1n.onrender.com/api/send-email', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/send-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
