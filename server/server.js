@@ -195,9 +195,9 @@ app.post('/api/send-email', async (req, res) => {
       emailSent: false
     }).save();
 
-    // Set a timeout for database save (5 seconds max)
+    // Set a timeout for database save (8 seconds max - increased for cold starts)
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Database timeout')), 5000)
+      setTimeout(() => reject(new Error('Database timeout')), 8000)
     );
 
     await Promise.race([savePromise, timeoutPromise]);
@@ -224,9 +224,14 @@ app.post('/api/send-email', async (req, res) => {
     const errorTime = Date.now() - startTime;
     console.error(`❌ Database error (${errorTime}ms):`, error.message);
     
+    // More specific error message for timeout
+    const errorMessage = error.message === 'Database timeout' 
+      ? 'Server is warming up. Please try again.'
+      : 'Failed to save message. Please try again later.';
+    
     res.status(500).json({ 
       success: false, 
-      message: 'Failed to save message. Please try again later.' 
+      message: errorMessage
     });
   }
 });

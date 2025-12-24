@@ -36,51 +36,80 @@ const Contact = () => {
     setIsLoading(true);
     setStatus('');
 
-    try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      
-      // Create abort controller for timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const maxRetries = 2;
+    let lastError = null;
 
-      const response = await fetch(`${apiUrl}/api/send-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-        signal: controller.signal,
+    // Retry logic with exponential backoff
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        // First attempt gets longer timeout (for cold starts), subsequent attempts get shorter timeout
+        const timeout = attempt === 0 ? 30000 : 15000; // 30s first, then 15s
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+        console.log(`Attempt ${attempt + 1}/${maxRetries + 1} - Timeout: ${timeout}ms`);
+
+        const response = await fetch(`${apiUrl}/api/send-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+        const data = await response.json();
+
+        if (data.success) {
+          setStatus({ 
+            type: 'success', 
+            message: data.message || 'Message sent successfully! I\'ll get back to you soon.'
+          });
+          setFormData({ name: '', email: '', message: '' });
+          setTimeout(() => setStatus(''), 5000);
+          setIsLoading(false);
+          return; // Success - exit the retry loop
+        } else {
+          setStatus({ type: 'error', message: data.message });
+          setIsLoading(false);
+          return; // Server responded with error - don't retry
+        }
+      } catch (error) {
+        console.error(`Attempt ${attempt + 1} failed:`, error);
+        lastError = error;
+        
+        // If this isn't the last attempt, wait before retrying
+        if (attempt < maxRetries) {
+          const waitTime = Math.min(1000 * Math.pow(2, attempt), 3000); // Exponential backoff: 1s, 2s
+          console.log(`Waiting ${waitTime}ms before retry...`);
+          
+          // Show user we're retrying
+          setStatus({ 
+            type: 'info', 
+            message: `Connection issue detected. Retrying... (${attempt + 2}/${maxRetries + 1})` 
+          });
+          
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+      }
+    }
+
+    // All retries failed
+    setIsLoading(false);
+    
+    if (lastError?.name === 'AbortError') {
+      setStatus({ 
+        type: 'error', 
+        message: 'Server is taking too long to respond. The server might be starting up - please try again in a moment.' 
       });
-
-      clearTimeout(timeoutId);
-      const data = await response.json();
-
-      if (data.success) {
-        setStatus({ 
-          type: 'success', 
-          message: data.message || 'Message sent successfully! I\'ll get back to you soon.'
-        });
-        setFormData({ name: '', email: '', message: '' });
-        setTimeout(() => setStatus(''), 5000);
-      } else {
-        setStatus({ type: 'error', message: data.message });
-      }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      
-      if (error.name === 'AbortError') {
-        setStatus({ 
-          type: 'error', 
-          message: 'Request timeout. Please check your connection and try again.' 
-        });
-      } else {
-        setStatus({ 
-          type: 'error', 
-          message: 'Failed to send message. Please try again later.' 
-        });
-      }
-    } finally {
-      setIsLoading(false);
+    } else {
+      setStatus({ 
+        type: 'error', 
+        message: 'Failed to send message. Please check your connection and try again.' 
+      });
     }
   };
 
@@ -469,6 +498,8 @@ const Contact = () => {
                     className={`p-4 rounded-xl border ${
                       status.type === 'success'
                         ? 'bg-green-500/10 border-green-500/30 text-green-400'
+                        : status.type === 'info'
+                        ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400'
                         : 'bg-red-500/10 border-red-500/30 text-red-400'
                     }`}
                   >
