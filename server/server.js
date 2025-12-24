@@ -54,59 +54,19 @@ if (process.env.BREVO_API_KEY || process.env.BREVO_SMTP_KEY) {
   console.log('💡 Add BREVO_API_KEY or BREVO_SMTP_KEY to enable emails');
 }
 
-// Email endpoint
-app.post('/api/send-email', async (req, res) => {
-  const { name, email, message } = req.body;
-
-  // Validation
-  if (!name || !email || !message) {
-    return res.status(400).json({ 
-      success: false, 
-      message: 'All fields are required' 
-    });
-  }
-
-  // Email format validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({ 
-      success: false, 
-      message: 'Invalid email format' 
-    });
-  }
-
-  // Generate unique token ID
-  const tokenId = `MSG-${nanoid(10)}`;
-
+// Async function to send email in background (non-blocking)
+const sendEmailInBackground = async (messageData, tokenId) => {
   try {
-    // Save to MongoDB
-    const newMessage = new Message({
-      tokenId,
-      name,
-      email,
-      message,
-      emailSent: false
-    });
+    console.log(`📧 Attempting to send email for ${tokenId}...`);
+    
+    if (!brevoClient) {
+      console.log('⚠️  Brevo API not configured - skipping email send');
+      return;
+    }
 
-    await newMessage.save();
-    console.log(`📝 Message saved with Token ID: ${tokenId}`);
-
-    // Send response immediately
-    res.status(200).json({ 
-      success: true, 
-      message: 'Message sent successfully!',
-      tokenId: tokenId
-    });
-
-
-    // Send email asynchronously using Brevo API
-    try {
-      console.log(`📧 Attempting to send email for ${tokenId}...`);
-      
-      if (!brevoClient) {
-        console.log('⚠️  Brevo API not configured - skipping email send');
-      } else {
-        const htmlContent = `
+    const { name, email, message } = messageData;
+    
+    const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb; border-radius: 10px;">
         <div style="background: linear-gradient(135deg, #1e40af 0%, #06b6d4 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
           <h1 style="color: white; margin: 0; font-size: 24px;">New Portfolio Message</h1>
@@ -155,18 +115,18 @@ app.post('/api/send-email', async (req, res) => {
       </div>
     `;
 
-        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-        sendSmtpEmail.sender = { 
-          email: process.env.EMAIL_FROM || 'solairaj495@gmail.com',
-          name: 'Portfolio Contact Form'
-        };
-        sendSmtpEmail.to = [{ 
-          email: process.env.EMAIL_TO || 'solairaj495@gmail.com'
-        }];
-        sendSmtpEmail.replyTo = { email: email, name: name };
-        sendSmtpEmail.subject = `Portfolio Contact from ${name} [${tokenId}]`;
-        sendSmtpEmail.htmlContent = htmlContent;
-        sendSmtpEmail.textContent = `
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    sendSmtpEmail.sender = { 
+      email: process.env.EMAIL_FROM || 'solairaj495@gmail.com',
+      name: 'Portfolio Contact Form'
+    };
+    sendSmtpEmail.to = [{ 
+      email: process.env.EMAIL_TO || 'solairaj495@gmail.com'
+    }];
+    sendSmtpEmail.replyTo = { email: email, name: name };
+    sendSmtpEmail.subject = `Portfolio Contact from ${name} [${tokenId}]`;
+    sendSmtpEmail.htmlContent = htmlContent;
+    sendSmtpEmail.textContent = `
 New Portfolio Message
 Token ID: ${tokenId}
 
@@ -179,25 +139,91 @@ ${message}
 ---
 Reply to this email to respond to ${name}
 Reference: ${tokenId}
-        `;
+    `;
 
-        const result = await brevoClient.sendTransacEmail(sendSmtpEmail);
-        
-        // Update database to mark email as sent
-        newMessage.emailSent = true;
-        await newMessage.save();
-        
-        console.log(`✅ Email sent successfully for ${tokenId}`);
-        console.log(`📨 Message ID: ${result.messageId}`);
-      }
-    } catch (emailError) {
-      console.error(`❌ Email sending failed for ${tokenId}:`, emailError.message);
-      console.error('   Error details:', emailError.response?.body || emailError);
-      // Don't throw - message is already saved, email failure shouldn't break the response
-    }
+    const result = await brevoClient.sendTransacEmail(sendSmtpEmail);
+    
+    // Update database to mark email as sent
+    await Message.updateOne(
+      { tokenId },
+      { $set: { emailSent: true } }
+    );
+    
+    console.log(`✅ Email sent successfully for ${tokenId}`);
+    console.log(`📨 Message ID: ${result.messageId}`);
+  } catch (emailError) {
+    console.error(`❌ Email sending failed for ${tokenId}:`, emailError.message);
+    console.error('   Error details:', emailError.response?.body || emailError);
+    // Don't throw - this is background processing
+  }
+};
+
+// Email endpoint
+app.post('/api/send-email', async (req, res) => {
+  const startTime = Date.now();
+  const { name, email, message } = req.body;
+
+  console.log(`📥 Received message from: ${name} (${email})`);
+
+  // Validation
+  if (!name || !email || !message) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'All fields are required' 
+    });
+  }
+
+  // Email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Invalid email format' 
+    });
+  }
+
+  // Generate unique token ID
+  const tokenId = `MSG-${nanoid(10)}`;
+
+  try {
+    // Save to MongoDB with timeout protection
+    const savePromise = new Message({
+      tokenId,
+      name,
+      email,
+      message,
+      emailSent: false
+    }).save();
+
+    // Set a timeout for database save (5 seconds max)
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Database timeout')), 5000)
+    );
+
+    await Promise.race([savePromise, timeoutPromise]);
+    
+    const dbTime = Date.now() - startTime;
+    console.log(`📝 Message saved with Token ID: ${tokenId} (${dbTime}ms)`);
+
+    // Send response immediately - don't wait for email
+    res.status(200).json({ 
+      success: true, 
+      message: 'Message received! I\'ll get back to you soon.',
+      tokenId: tokenId
+    });
+
+    const responseTime = Date.now() - startTime;
+    console.log(`✅ Response sent in ${responseTime}ms`);
+
+    // Send email in background (non-blocking)
+    setImmediate(() => {
+      sendEmailInBackground({ name, email, message }, tokenId);
+    });
 
   } catch (error) {
-    console.error('❌ Database error:', error);
+    const errorTime = Date.now() - startTime;
+    console.error(`❌ Database error (${errorTime}ms):`, error.message);
+    
     res.status(500).json({ 
       success: false, 
       message: 'Failed to save message. Please try again later.' 

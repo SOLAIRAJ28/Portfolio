@@ -38,20 +38,27 @@ const Contact = () => {
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      
+      // Create abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch(`${apiUrl}/api/send-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (data.success) {
         setStatus({ 
           type: 'success', 
-          message: data.message
+          message: data.message || 'Message sent successfully! I\'ll get back to you soon.'
         });
         setFormData({ name: '', email: '', message: '' });
         setTimeout(() => setStatus(''), 5000);
@@ -60,10 +67,18 @@ const Contact = () => {
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      setStatus({ 
-        type: 'error', 
-        message: 'Failed to send message. Please make sure the server is running.' 
-      });
+      
+      if (error.name === 'AbortError') {
+        setStatus({ 
+          type: 'error', 
+          message: 'Request timeout. Please check your connection and try again.' 
+        });
+      } else {
+        setStatus({ 
+          type: 'error', 
+          message: 'Failed to send message. Please try again later.' 
+        });
+      }
     } finally {
       setIsLoading(false);
     }
